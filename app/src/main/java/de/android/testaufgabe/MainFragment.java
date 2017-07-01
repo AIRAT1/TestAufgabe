@@ -38,6 +38,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private LocationManager locationManager;
     private LocationListener locationListener;
     private LinearLayout linearLayout;
+    private String text = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 getActivity(),
                 android.R.layout.simple_list_item_1,
                 arrayList);
+        listView.setAdapter(adapter);
 
         button.setOnClickListener(this);
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
@@ -77,7 +79,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             public void onLocationChanged(Location location) {
                 textView.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
-                textView.setText(location.getLatitude() + "/" + location.getLongitude());
+                text = location.getLatitude() + "/" + location.getLongitude();
+                arrayList.add(text);
+                adapter.notifyDataSetChanged();
+                textView.setText(text);
             }
 
             @Override
@@ -101,7 +106,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             ActivityCompat.requestPermissions(getActivity(), new String[]{
                     Manifest.permission.CAMERA,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
-            }, ConstantManager.CAMERA_REQUEST_PERMISSION_CODE);
+            }, ConstantManager.GPS_REQUEST_PERMISSION_CODE);
             Snackbar.make(linearLayout, "Для корректной работы необходимо дать требуемые разрешения",
                     Snackbar.LENGTH_LONG)
                     .setAction("Разрешить", new View.OnClickListener() {
@@ -111,7 +116,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                         }
                     }).show();
         } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Integer.MAX_VALUE, Integer.MAX_VALUE, locationListener);
         }
 
     }
