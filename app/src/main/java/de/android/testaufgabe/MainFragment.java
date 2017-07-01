@@ -50,6 +50,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        arrayList = new ArrayList<>();
         loadPreferences();
         setRetainInstance(true);
     }
@@ -60,7 +62,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.activity_main, container, false);
         linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
         getActivity();
-        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+//        prefs = ;
         button = (Button) view.findViewById(R.id.button);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         textView = (TextView) view.findViewById(R.id.textView);
@@ -162,6 +164,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void loadPreferences() {
+
         if (prefs != null) {
             set = prefs.getStringSet(ConstantManager.KEY_OF_SET, null);
             if (set != null && arrayList != null) {
