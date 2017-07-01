@@ -97,7 +97,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     public void onLocationChanged(Location location) {
                         textView.setVisibility(View.VISIBLE);
                         progressBar.setVisibility(View.GONE);
+
+//                        Geocoder gcd = new Geocoder(getActivity(), Locale.getDefault());
+//                        try {
+//                            List<Address> addresses = gcd.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+//                            Log.d("TEST", String.valueOf(addresses.size()));
+//                            if (addresses.size() > 0) {
+//                                text = addresses.get(0).getLocality();
+//                            }else {
+//                                text = location.getLatitude() + "/" + location.getLongitude();
+//                            }
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+
                         text = location.getLatitude() + "/" + location.getLongitude();
+
                         arrayList.add(text);
                         adapter.notifyDataSetChanged();
                         textView.setText(text);
@@ -141,6 +156,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                     arrayList.clear();
                 }
                 adapter.notifyDataSetChanged();
+                savePreferences();
                 break;
             default:
                 break;
