@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,9 +29,11 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class MainFragment extends Fragment implements View.OnClickListener {
@@ -98,20 +102,23 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                         textView.setVisibility(View.VISIBLE);
                         progressBar.setVisibility(View.GONE);
 
-//                        Geocoder gcd = new Geocoder(getActivity(), Locale.getDefault());
-//                        try {
-//                            List<Address> addresses = gcd.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-//                            Log.d("TEST", String.valueOf(addresses.size()));
-//                            if (addresses.size() > 0) {
-//                                text = addresses.get(0).getLocality();
-//                            }else {
-//                                text = location.getLatitude() + "/" + location.getLongitude();
-//                            }
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
+                        if (Geocoder.isPresent()) {
+                            Geocoder gcd = new Geocoder(getActivity(), Locale.getDefault());
+                            try {
+                                List<Address> addresses = gcd.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                if (addresses.size() > 0) {
+                                    text = addresses.get(0).getLocality();
+                                }else {
+                                    text = location.getLatitude() + "/" + location.getLongitude();
+                                }
+                            } catch (IOException e) {
+                                text = location.getLatitude() + "/" + location.getLongitude();
+                            }
+                        }else {
+                            text = location.getLatitude() + "/" + location.getLongitude();
+                        }
 
-                        text = location.getLatitude() + "/" + location.getLongitude();
+//                        text = location.getLatitude() + "/" + location.getLongitude();
 
                         arrayList.add(text);
                         adapter.notifyDataSetChanged();
