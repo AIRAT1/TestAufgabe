@@ -4,11 +4,14 @@ package de.android.testaufgabe;
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.view.LayoutInflater;
@@ -19,7 +22,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,23 +65,21 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-//        progressBar.setVisibility(View.VISIBLE);
-        textView.setVisibility(View.VISIBLE);
+        textView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            Toast.makeText(getActivity(), "Add permissions", Toast.LENGTH_SHORT).show();
-            return;
+
+
+
+//            Toast.makeText(getActivity(), "Add permissions", Toast.LENGTH_SHORT).show();
+//            return;
         }
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                textView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
                 textView.setText(location.getLatitude() + "/" + location.getLongitude());
             }
 
@@ -105,5 +105,11 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         locationManager.removeUpdates(locationListener);
         super.onPause();
+    }
+
+    public void openApplicationSettings() {
+        Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:" + getActivity().getPackageName()));
+        startActivityForResult(appSettingsIntent, ConstantManager.PERMISSION_REQUEST_SETTINGS_CODE);
     }
 }
