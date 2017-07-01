@@ -5,6 +5,7 @@ import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -26,7 +27,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainFragment extends Fragment implements View.OnClickListener {
     private Button button;
@@ -39,6 +42,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private LocationListener locationListener;
     private LinearLayout linearLayout;
     private String text = null;
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
+    private Set<String> set;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,11 +57,16 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
         linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
+        getActivity();
+        prefs = getActivity().getSharedPreferences(ConstantManager.SHARED_PREFS, Context.MODE_PRIVATE);
         button = (Button) view.findViewById(R.id.button);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         textView = (TextView) view.findViewById(R.id.textView);
         listView = (ListView) view.findViewById(R.id.listView);
-        arrayList = new ArrayList<>();
+        loadPreferences();
+        if (arrayList == null) {
+            arrayList = new ArrayList<>();
+        }
         adapter = new ArrayAdapter<>(
                 getActivity(),
                 android.R.layout.simple_list_item_1,
@@ -122,14 +133,41 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onPause() {
         locationManager.removeUpdates(locationListener);
+        savePreferences();
         super.onPause();
     }
 
-    public void openApplicationSettings() {
+    private void openApplicationSettings() {
         Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                 Uri.parse("package:" + getActivity().getPackageName()));
         startActivityForResult(appSettingsIntent, ConstantManager.PERMISSION_REQUEST_SETTINGS_CODE);
     }
+
+    private void savePreferences() {
+        editor = prefs.edit();
+        set = new HashSet<>();
+        set.addAll(arrayList);
+        editor.putStringSet(ConstantManager.KEY_OF_SET, set);
+        editor.commit();
+    }
+
+    private void loadPreferences() {
+        if (prefs != null) {
+            set = prefs.getStringSet(ConstantManager.KEY_OF_SET, null);
+            if (set != null) {
+                for (String s : set) {
+                    arrayList.add(s);
+                }
+            }
+        }
+    }
+
+
 }
