@@ -61,7 +61,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
         linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
-        getActivity();
+
         btnFind = (Button) view.findViewById(R.id.btnFind);
         btnSkip = (Button) view.findViewById(R.id.btnSkip);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
