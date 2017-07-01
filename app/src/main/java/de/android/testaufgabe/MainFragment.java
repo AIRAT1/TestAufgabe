@@ -12,6 +12,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -49,6 +50,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        loadPreferences();
         setRetainInstance(true);
     }
 
@@ -58,12 +60,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.activity_main, container, false);
         linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
         getActivity();
-        prefs = getActivity().getSharedPreferences(ConstantManager.SHARED_PREFS, Context.MODE_PRIVATE);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         button = (Button) view.findViewById(R.id.button);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         textView = (TextView) view.findViewById(R.id.textView);
         listView = (ListView) view.findViewById(R.id.listView);
-        loadPreferences();
+
         if (arrayList == null) {
             arrayList = new ArrayList<>();
         }
@@ -115,8 +117,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(getActivity(), new String[]{
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    Manifest.permission.ACCESS_FINE_LOCATION
             }, ConstantManager.GPS_REQUEST_PERMISSION_CODE);
             Snackbar.make(linearLayout, "Для корректной работы необходимо дать требуемые разрешения",
                     Snackbar.LENGTH_LONG)
@@ -139,7 +140,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onPause() {
-        locationManager.removeUpdates(locationListener);
+        if (locationListener != null) {
+            locationManager.removeUpdates(locationListener);
+        }
         savePreferences();
         super.onPause();
     }
@@ -155,13 +158,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         set = new HashSet<>();
         set.addAll(arrayList);
         editor.putStringSet(ConstantManager.KEY_OF_SET, set);
-        editor.commit();
+        editor.apply();
     }
 
     private void loadPreferences() {
         if (prefs != null) {
             set = prefs.getStringSet(ConstantManager.KEY_OF_SET, null);
-            if (set != null) {
+            if (set != null && arrayList != null) {
                 for (String s : set) {
                     arrayList.add(s);
                 }
