@@ -106,7 +106,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                             Geocoder gcd = new Geocoder(getActivity(), Locale.getDefault());
                             try {
                                 List<Address> addresses = gcd.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                if (addresses.size() > 0) {
+                                if (addresses != null && addresses.size() > 0) {
                                     text = addresses.get(0).getLocality();
                                 }else {
                                     text = location.getLatitude() + "/" + location.getLongitude();
@@ -161,6 +161,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             case R.id.btnSkip:
                 if (arrayList != null) {
                     arrayList.clear();
+                    textView.setText("");
                 }
                 adapter.notifyDataSetChanged();
                 savePreferences();
@@ -187,7 +188,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void openApplicationSettings() {
-        Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+        Intent appSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS,
                 Uri.parse("package:" + getActivity().getPackageName()));
         startActivityForResult(appSettingsIntent, ConstantManager.PERMISSION_REQUEST_SETTINGS_CODE);
     }
