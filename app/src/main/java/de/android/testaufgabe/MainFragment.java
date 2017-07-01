@@ -13,12 +13,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,6 +37,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private List<String> arrayList;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    private LinearLayout linearLayout;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +49,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
+        linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
         button = (Button) view.findViewById(R.id.button);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         textView = (TextView) view.findViewById(R.id.textView);
@@ -67,14 +71,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         textView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-
-
-//            Toast.makeText(getActivity(), "Add permissions", Toast.LENGTH_SHORT).show();
-//            return;
-        }
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -85,20 +82,38 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
-
+                //unused
             }
 
             @Override
             public void onProviderEnabled(String provider) {
-
+                //unused
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-
+                //unused
             }
         };
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(getActivity(), new String[]{
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, ConstantManager.CAMERA_REQUEST_PERMISSION_CODE);
+            Snackbar.make(linearLayout, "Для корректной работы необходимо дать требуемые разрешения",
+                    Snackbar.LENGTH_LONG)
+                    .setAction("Разрешить", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            openApplicationSettings();
+                        }
+                    }).show();
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        }
+
     }
 
     @Override
