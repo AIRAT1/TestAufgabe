@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainFragment extends Fragment implements View.OnClickListener {
-    private Button button;
+    private Button btnFind, btnSkip;
     private ProgressBar progressBar;
     private TextView textView;
     private ListView listView;
@@ -62,8 +62,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.activity_main, container, false);
         linearLayout = (LinearLayout)view.findViewById(R.id.linearLayout);
         getActivity();
-//        prefs = ;
-        button = (Button) view.findViewById(R.id.button);
+        btnFind = (Button) view.findViewById(R.id.btnFind);
+        btnSkip = (Button) view.findViewById(R.id.btnSkip);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         textView = (TextView) view.findViewById(R.id.textView);
         listView = (ListView) view.findViewById(R.id.listView);
@@ -77,7 +77,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 arrayList);
         listView.setAdapter(adapter);
 
-        button.setOnClickListener(this);
+        btnFind.setOnClickListener(this);
+        btnSkip.setOnClickListener(this);
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
 
@@ -86,52 +87,65 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        textView.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
+        switch (v.getId()) {
+            case R.id.btnFind:
+                textView.setVisibility(View.GONE);
+                progressBar.setVisibility(View.VISIBLE);
 
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                textView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-                text = location.getLatitude() + "/" + location.getLongitude();
-                arrayList.add(text);
+                locationListener = new LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        textView.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.GONE);
+                        text = location.getLatitude() + "/" + location.getLongitude();
+                        arrayList.add(text);
+                        adapter.notifyDataSetChanged();
+                        textView.setText(text);
+                    }
+
+                    @Override
+                    public void onStatusChanged(String provider, int status, Bundle extras) {
+                        //unused
+                    }
+
+                    @Override
+                    public void onProviderEnabled(String provider) {
+                        //unused
+                    }
+
+                    @Override
+                    public void onProviderDisabled(String provider) {
+                        //unused
+                    }
+                };
+
+                if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                    }, ConstantManager.GPS_REQUEST_PERMISSION_CODE);
+                    Snackbar.make(linearLayout, "Для корректной работы необходимо дать требуемые разрешения",
+                            Snackbar.LENGTH_LONG)
+                            .setAction("Разрешить", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    openApplicationSettings();
+                                }
+                            }).show();
+                } else {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Integer.MAX_VALUE, Integer.MAX_VALUE, locationListener);
+                }
+                break;
+            case R.id.btnSkip:
+                if (arrayList != null) {
+                    arrayList.clear();
+                }
                 adapter.notifyDataSetChanged();
-                textView.setText(text);
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-                //unused
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-                //unused
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-                //unused
-            }
-        };
-
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(getActivity(), new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION
-            }, ConstantManager.GPS_REQUEST_PERMISSION_CODE);
-            Snackbar.make(linearLayout, "Для корректной работы необходимо дать требуемые разрешения",
-                    Snackbar.LENGTH_LONG)
-                    .setAction("Разрешить", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            openApplicationSettings();
-                        }
-                    }).show();
-        } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Integer.MAX_VALUE, Integer.MAX_VALUE, locationListener);
+                break;
+            default:
+                break;
         }
+
 
     }
 
